@@ -1,0 +1,35 @@
+{
+  "name": "@ledgerproof/agent-passport",
+  "version": "0.1.0",
+  "description": "Agent Passport — LedgerProof's authorization + receipt layer for x402 machine payments. A companion to x402, not a replacement.",
+  "type": "module",
+  "main": "agent-passport.mjs",
+  "exports": {
+    ".": "./agent-passport.mjs",
+    "./proofgateway": "./proofgateway-middleware.mjs",
+    "./sign-viem": "./examples/sign-viem.mjs"
+  },
+  "files": [
+    "agent-passport.mjs",
+    "proofgateway-middleware.mjs",
+    "examples/sign-viem.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "node --check agent-passport.mjs && node --check proofgateway-middleware.mjs && node --check examples/sign-viem.mjs"
+  },
+  "keywords": ["x402", "agent", "payments", "usdc", "base", "authorization", "receipts", "ledgerproof", "agentic-commerce", "mcp"],
+  "author": "LedgerProof",
+  "license": "Apache-2.0",
+  "homepage": "https://ledgerproofhq.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vsdawkins-creator/ledgerproof-agent-passport.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vsdawkins-creator/ledgerproof-agent-passport/issues"
+  },
+  "engines": { "node": ">=18" },
+  "publishConfig": { "access": "public", "provenance": true }
+}

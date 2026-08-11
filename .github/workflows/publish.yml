@@ -1,0 +1,47 @@
+name: Publish to npm (provenance)
+
+# Publishes @ledgerproof/agent-passport to npm WITH build provenance: a Sigstore
+# attestation, generated via GitHub OIDC, linking the tarball to this PUBLIC repo + commit + run.
+#
+# AUTH: npm Trusted Publishing (OIDC, TOKENLESS) — no npm token. The `id-token: write`
+# permission lets npm (>= 11.5.1) exchange a GitHub OIDC token for a short-lived registry
+# credential. Requires a ONE-TIME trusted-publisher entry on npmjs.com (org owner action):
+#   package @ledgerproof/agent-passport · owner vsdawkins-creator
+#   · repo ledgerproof-agent-passport · workflow publish.yml · environment (none)
+# Provenance is independent of auth — it comes from id-token + the public repo.
+#
+# Run with dry_run = true first (verifies the tarball), then dry_run = false to publish.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Simulate only (npm publish --dry-run). Nothing is published."
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write # REQUIRED -- OIDC for trusted publishing + provenance
+
+jobs:
+  publish:
+    name: "@ledgerproof/agent-passport"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+      - name: Upgrade npm (trusted publishing needs >= 11.5.1)
+        run: npm install -g npm@latest
+      - name: Syntax gate (never publish a broken build)
+        run: npm run check
+      - name: Publish with provenance
+        if: ${{ inputs.dry_run == false }}
+        run: npm publish --access public --provenance
+      - name: Simulate publish (dry run — nothing is published)
+        if: ${{ inputs.dry_run == true }}
+        run: npm publish --access public --provenance --dry-run
