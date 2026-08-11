@@ -41,6 +41,11 @@ jobs:
         run: npm run check
       - name: Publish with provenance
         if: ${{ inputs.dry_run == false }}
+        # Trusted-publishing OIDC handles auth once the package exists + a trusted publisher is configured.
+        # For the FIRST publish of a brand-new scoped package (which OIDC can't create), set an NPM_TOKEN
+        # secret (a granular/automation token with publish rights to @ledgerproof); it's used only if present.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --provenance
       - name: Simulate publish (dry run — nothing is published)
         if: ${{ inputs.dry_run == true }}
