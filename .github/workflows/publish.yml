@@ -39,13 +39,10 @@ jobs:
         run: npm install -g npm@latest
       - name: Syntax gate (never publish a broken build)
         run: npm run check
-      - name: Publish with provenance
+      - name: Publish with provenance (Trusted Publishing / OIDC — tokenless)
         if: ${{ inputs.dry_run == false }}
-        # Trusted-publishing OIDC handles auth once the package exists + a trusted publisher is configured.
-        # For the FIRST publish of a brand-new scoped package (which OIDC can't create), set an NPM_TOKEN
-        # secret (a granular/automation token with publish rights to @ledgerproof); it's used only if present.
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # Tokenless: relies on a Trusted Publisher configured on npm for this repo + workflow.
+        # (Bypass-2FA tokens are being restricted for creating packages, so OIDC is the path.)
         run: npm publish --access public --provenance
       - name: Simulate publish (dry run — nothing is published)
         if: ${{ inputs.dry_run == true }}
