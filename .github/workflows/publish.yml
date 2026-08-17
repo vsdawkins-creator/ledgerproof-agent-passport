@@ -39,15 +39,15 @@ jobs:
         run: npm install -g npm@latest
       - name: Syntax gate (never publish a broken build)
         run: npm run check
-      - name: Publish (first release via NPM_TOKEN — OIDC can't create a brand-new scoped package)
+      - name: Publish with provenance (Trusted Publishing / OIDC — tokenless)
         if: ${{ inputs.dry_run == false }}
-        # The FIRST publish of a never-before-seen scoped package cannot be tokenless: OIDC/Trusted
-        # Publishing has no existing package to bind to, so it fails (all 6 prior runs). Authenticate the
-        # first publish with the NPM_TOKEN secret; --provenance still attaches an attestation via the
-        # id-token below. Once 0.1.0 exists on npm, configure a Trusted Publisher and later releases can
-        # go back to tokenless OIDC (drop this env).
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # Token auth is a DEAD END: npm revoked 2FA-bypass tokens (Dec 2025-Feb 2026 after the May 2026
+        # supply-chain incident), so NPM_TOKEN now returns EOTP (confirmed 2026-08-17). Trusted Publishing
+        # (OIDC) is the only sanctioned path. ONE-TIME account-owner action, then this step just works:
+        #   npmjs.com -> @ledgerproof/agent-passport -> Settings -> Trusted Publisher -> GitHub Actions:
+        #     org=vsdawkins-creator  repo=ledgerproof-agent-passport  workflow=publish.yml  (no environment)
+        # For a brand-new (never-published) scoped package, bootstrap the name first — see npm's
+        # "trusted-publishers" docs / setup-npm-trusted-publish — then re-run this workflow.
         run: npm publish --access public --provenance
       - name: Simulate publish (dry run — nothing is published)
         if: ${{ inputs.dry_run == true }}
